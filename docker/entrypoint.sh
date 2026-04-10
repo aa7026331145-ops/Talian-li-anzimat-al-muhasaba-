@@ -32,10 +32,23 @@ fi
 DB_HOST="${DB_HOST:-db}"
 DB_PORT="${DB_PORT:-3306}"
 echo "[entrypoint] Waiting for database at ${DB_HOST}:${DB_PORT}..."
-until mysql -h"$DB_HOST" -P"$DB_PORT" -u"${DB_USERNAME:-talian}" -p"${DB_PASSWORD:-secret}" -e "SELECT 1" > /dev/null 2>&1; do
+
+# Write a temporary MySQL defaults file to avoid exposing credentials in the process list
+MYSQL_CNF=$(mktemp)
+chmod 600 "$MYSQL_CNF"
+cat > "$MYSQL_CNF" << EOF
+[client]
+host=${DB_HOST}
+port=${DB_PORT}
+user=${DB_USERNAME:-talian}
+password=${DB_PASSWORD:-secret}
+EOF
+
+until mysql --defaults-extra-file="$MYSQL_CNF" -e "SELECT 1" > /dev/null 2>&1; do
     echo "[entrypoint] Database not ready yet — retrying in 3s..."
     sleep 3
 done
+rm -f "$MYSQL_CNF"
 echo "[entrypoint] Database is ready."
 
 # ─────────────────────────────────────────────

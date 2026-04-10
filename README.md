@@ -61,8 +61,8 @@ docker compose ps
 
 | الدور | البريد الإلكتروني | كلمة المرور |
 |-------|-----------------|------------|
-| Super Admin | superadmin@talian-erp.local | SuperAdmin@2024! |
-| Tenant Admin | admin@demo.talian-erp.local | Admin@2024! |
+| Super Admin | superadmin@talian-erp.local | value of DEFAULT_SUPER_ADMIN_PASSWORD in .env |
+| Tenant Admin | admin@demo.talian-erp.local | value of DEFAULT_ADMIN_PASSWORD in .env |
 
 > **تحذير:** غيّر كلمات المرور فور النشر على الإنتاج.
 

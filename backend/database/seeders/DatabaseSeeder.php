@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'superadmin@talian-erp.local'],
             [
                 'name'      => 'Super Admin',
-                'password'  => Hash::make('SuperAdmin@2024!'),
+                'password'  => Hash::make(env('DEFAULT_SUPER_ADMIN_PASSWORD', 'SuperAdmin@' . date('Y') . '!')),
                 'is_active' => true,
             ]
         );
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name'      => 'مدير النظام',
                 'tenant_id' => $tenant->id,
-                'password'  => Hash::make('Admin@2024!'),
+                'password'  => Hash::make(env('DEFAULT_ADMIN_PASSWORD', 'Admin@' . date('Y') . '!')),
                 'is_active' => true,
             ]
         );
