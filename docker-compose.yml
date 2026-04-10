@@ -1,0 +1,87 @@
+services:
+  # ─────────────────────────────────────────
+  # Laravel PHP-FPM application
+  # ─────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: talian_app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    volumes:
+      - app_storage:/var/www/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - talian
+    healthcheck:
+      test: ["CMD", "php", "-r", "require '/var/www/vendor/autoload.php'; exit(0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # ─────────────────────────────────────────
+  # MySQL / MariaDB database
+  # ─────────────────────────────────────────
+  db:
+    image: mariadb:11
+    container_name: talian_db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootsecret}"
+      MARIADB_DATABASE: "${DB_DATABASE:-talian_erp}"
+      MARIADB_USER: "${DB_USERNAME:-talian}"
+      MARIADB_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - talian
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ─────────────────────────────────────────
+  # Redis (cache / queues / sessions)
+  # ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: talian_redis
+    restart: unless-stopped
+    networks:
+      - talian
+
+  # ─────────────────────────────────────────
+  # Nginx reverse proxy (port 80 → app:9000)
+  # ─────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: talian_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+      # Uncomment below to enable HTTPS (provide certs via volumes)
+      # - "443:443"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - app_storage:/var/www/storage:ro
+    depends_on:
+      - app
+    networks:
+      - talian
+
+volumes:
+  db_data:
+  app_storage:
+
+networks:
+  talian:
+    driver: bridge
