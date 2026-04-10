@@ -1,0 +1,15 @@
+# Environment files (never commit secrets)
+.env
+
+# Docker override files
+docker-compose.override.yml
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
