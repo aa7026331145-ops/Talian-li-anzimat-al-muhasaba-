@@ -1,0 +1,30 @@
+﻿require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { sequelize } = require('./models');
+
+const authRoutes = require('./routes/auth');
+const customerRoutes = require('./routes/customers');
+const productRoutes = require('./routes/products');
+
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+
+// ربط المسارات
+app.use('/auth', authRoutes);
+app.use('/customers', customerRoutes);
+app.use('/products', productRoutes);
+
+// تشغيل الخادم
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Database connected');
+  } catch (err) {
+    console.error('❌ Database connection error:', err.message);
+  }
+  console.log(🚀 Server running on port );
+});

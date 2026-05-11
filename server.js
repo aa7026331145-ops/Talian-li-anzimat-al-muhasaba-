@@ -1,5 +1,3 @@
-name=backend/server.js
-// نقطة بداية backend - Express + Sequelize
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -9,30 +7,24 @@ const { sequelize } = require('./models');
 const authRoutes = require('./routes/auth');
 const customerRoutes = require('./routes/customers');
 const productRoutes = require('./routes/products');
-const invoiceRoutes = require('./routes/invoices');
 
 const app = express();
-app.use(cors());
 app.use(bodyParser.json());
+app.use(cors());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/invoices', invoiceRoutes);
+// routes
+app.use('/auth', authRoutes);
+app.use('/customers', customerRoutes);
+app.use('/products', productRoutes);
 
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 4000;
-
-(async () => {
+app.listen(PORT, async () => {
   try {
     await sequelize.authenticate();
-    // sync جميع الموديلات (MVP)
-    await sequelize.sync({ alter: true });
-    console.log('Database connected and synced');
-    app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
+    console.log('Database connected');
   } catch (err) {
-    console.error('Unable to start server:', err);
+    console.error('Database connection error:', err.message);
   }
-})();
+  console.log(`Server running on port ${PORT}`);
+});
